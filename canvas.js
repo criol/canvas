@@ -38,11 +38,31 @@ canvasMe.canva = function (nodeName) {
 
 canvasMe.canva.prototype = {
 	draw: function (opt) {
-			//this.del(opt.id);   ////////// not ready
-			this.figures[opt.id] = opt;
-			canvasMe.tools[opt.figure].call(this, opt);
+		this.del(opt.id);   ////////// not ready
+		this.figures[opt.id] = opt;
+		canvasMe.tools[opt.figure].call(this, opt);
 		
 	},
+	
+	del : function (id) {
+		var a = 0;
+		
+		for (a in this.figures) {
+			if (a === id){
+				delete this.figures[a];
+				this.refreshCanv();
+			}
+		}	
+	},
+	
+	refreshCanv : function () {
+		var a;
+		this.ctx.clearRect(0, 0, this.node.width, this.node.height);
+		for (a in this.figures) {
+			this.draw(this.figures[a]);
+		}
+	},
+	
 	get: function (id) {
 		var f = function(){},
 			F;
@@ -76,6 +96,11 @@ canvasMe.tools = {
 			radius : function (opt, radius) {
 				opt.r = radius;
 				this.draw(opt);
+			},
+			position : function (opt, x, y) {
+				opt.x = x || opt.x;
+				opt.y = y || opt.y;
+				this.draw(opt);
 			}
 		}
 		
@@ -104,4 +129,5 @@ a.draw({
 	id : 'red'
 });
 a.get('red').stroke("#f03fae");
-a.get('red').radius(10)
+a.get('red').radius(10);
+a.get('red').position(40, 50);
