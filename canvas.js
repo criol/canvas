@@ -8,6 +8,12 @@ var canvasMe;
 
 (function (nodeName) {
 	
+function bind(func, context) {
+  return function() { 
+    return func.apply(context, arguments); 
+  };
+}
+
 canvasMe = function (nodeName) {
 	if (nodeName in canvasMe.nodes) {
 		return canvasMe.nodes[nodeName];
@@ -63,9 +69,26 @@ canvasMe.tools = {
 		this.ctx.closePath();
 		
 		this.figures[opt.id].methods = {
-			color : function (col)	{
-				console.log(this);
+			stroke : function (opt, col) {
+				opt.stroke = col;
+				this.draw(opt);
+			},
+			radius : function (opt, radius) {
+				opt.r = radius;
+				this.draw(opt);
 			}
+		}
+		
+		canvasMe.helpers.bind(this.figures[opt.id].methods, this, opt);
+	}
+};
+
+canvasMe.helpers = {
+	bind : function (obj, cont, opt) {
+		var method;
+		
+		for (method in obj) {
+			obj[method] = obj[method].bind(cont, opt)
 		}
 	}
 }
@@ -80,4 +103,5 @@ a.draw({
 	r : 5,
 	id : 'red'
 });
-a.get('red').color();
+a.get('red').stroke("#f03fae");
+a.get('red').radius(10)
