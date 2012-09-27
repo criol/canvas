@@ -34,7 +34,7 @@ canvasMe.canva = function (nodeName) {
 	canvasMe.nodes[nodeName] = this;
 	
 	return this;
-} 
+};
 
 canvasMe.canva.prototype = {
 	draw: function (opt) {
@@ -92,15 +92,18 @@ canvasMe.tools = {
 			stroke : function (opt, col) {
 				opt.stroke = col;
 				this.draw(opt);
+				return this.get(opt.id);
 			},
 			radius : function (opt, radius) {
 				opt.r = radius;
 				this.draw(opt);
+				return this.get(opt.id);
 			},
 			position : function (opt, x, y) {
 				opt.x = x || opt.x;
 				opt.y = y || opt.y;
 				this.draw(opt);
+				return this.get(opt.id);
 			}
 		}
 		
@@ -128,6 +131,12 @@ a.draw({
 	r : 5,
 	id : 'red'
 });
-a.get('red').stroke("#f03fae");
-a.get('red').radius(10);
-a.get('red').position(40, 50);
+a.draw({
+	figure : 'circle',
+	x : 10,
+	y : 10,
+	r : 5,
+	id : 'green'
+})
+a.get('red').stroke("#f03fae").radius(10).position(40, 50);
+a.get('green').radius(15).position(60, 40).stroke('#00ff00');
