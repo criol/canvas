@@ -7,13 +7,13 @@
 var canvasMe;
 
 (function (nodeName) {
-	
-function bind(func, context) {
-  return function() { 
-    return func.apply(context, arguments); 
-  };
-}
 
+/**
+ * вернуть/создать объект canvasMe
+ * 
+ * @expose
+ * @param {String} [nodeName] - имя узла
+ */
 canvasMe = function (nodeName) {
 	if (nodeName in canvasMe.nodes) {
 		return canvasMe.nodes[nodeName];
@@ -25,18 +25,50 @@ canvasMe = function (nodeName) {
 // объекты canvasMe
 canvasMe.nodes = {}
 
+/**
+ * создать объект canvasMe
+ * 
+ * @constructor
+ * @param {String} [nodeName] - имя узла
+ */
+
 canvasMe.canva = function (nodeName) {
-	this.figures = {}; // все фигуры на данной канве
+	// все фигуры на данной канве
+	this.figures = {}; 
+	// все имя канвы
 	this.name = nodeName.substr(1, nodeName.lenght);
+	// узел канвы
 	this.node = document.querySelector(nodeName);
+	// 2d контекст
 	this.ctx = this.node.getContext('2d');
 	
+	// сохраняем полученный объект в массив узлов(канвасов)
 	canvasMe.nodes[nodeName] = this;
 	
 	return this;
 };
 
+/////////////////////////////////
+//// Методы основных операций над узлом.
+/////////////////////////////////
+
 canvasMe.canva.prototype = {
+	/**
+	 * нарисовать фигуру
+	 * 
+	 * @expose
+	 * @param {Object} [opt] - объект с параметрами (тип фигуры, позиция и тд)
+	 * 
+	 * @example
+	 * canvasMe('#example').draw({
+     *     figure : 'circle',
+	 *     x : 10,
+	 *     y : 10,
+	 *     r : 5,
+	 *     id : 'red'
+	 * });
+
+	 */
 	draw: function (opt) {
 		this.del(opt.id);   ////////// not ready
 		this.figures[opt.id] = opt;
@@ -44,6 +76,12 @@ canvasMe.canva.prototype = {
 		
 	},
 	
+	/**
+	 * удалить фигуру
+	 * 
+	 * @expose
+	 * @param {String} [id] - id фигуры
+	 */
 	del : function (id) {
 		var a = 0;
 		
@@ -55,6 +93,11 @@ canvasMe.canva.prototype = {
 		}	
 	},
 	
+	/**
+	 * обновить канвас
+	 * 
+	 * @expose
+	 */
 	refreshCanv : function () {
 		var a;
 		this.ctx.clearRect(0, 0, this.node.width, this.node.height);
@@ -63,6 +106,12 @@ canvasMe.canva.prototype = {
 		}
 	},
 	
+	/**
+	 * вернуть фигуру
+	 * 
+	 * @expose
+	 * @param {String} [id] - id фигуры
+	 */
 	get: function (id) {
 		var f = function(){},
 			F;
@@ -74,9 +123,17 @@ canvasMe.canva.prototype = {
 	}
 }
 
-
+/////////////////////////////////
+//// Инструменты для рисования
+/////////////////////////////////
 
 canvasMe.tools = {
+	/**
+	 * нарисовать круг
+	 * 
+	 * @expose
+	 * @param {Object} [opt] - объект с параметрами (тип фигуры, позиция и тд)
+	 */
 	circle : function (opt) {
 		var x = opt.x,
 			y = opt.y,
@@ -88,6 +145,7 @@ canvasMe.tools = {
 		this.ctx.stroke();
 		this.ctx.closePath();
 		
+		// добавляем методы, присущие только кругу
 		this.figures[opt.id].methods = {
 			stroke : function (opt, col) {
 				opt.stroke = col;
@@ -107,11 +165,25 @@ canvasMe.tools = {
 			}
 		}
 		
+		// биндим контексты
 		canvasMe.helpers.bind(this.figures[opt.id].methods, this, opt);
 	}
 };
 
+
+/////////////////////////////////
+//// Вспомогательные методы
+/////////////////////////////////
+
 canvasMe.helpers = {
+	/**
+	 * привязка методов в объекту
+	 * 
+	 * @expose
+	 * @param {Object} [obj] - объект, чьи методы будут привязоны
+	 * @param {Object} [cont] - объект. к кому будут привязаны методы (контект исполнения)
+	 * @param {Object} [opt] - объект с параметрами (тип фигуры, позиция и тд)
+	 */
 	bind : function (obj, cont, opt) {
 		var method;
 		
@@ -122,6 +194,12 @@ canvasMe.helpers = {
 }
 
 }())
+
+
+/////////////////////////////////
+//// DEMO
+/////////////////////////////////
+
 
 var a = canvasMe('#example');
 a.draw({
