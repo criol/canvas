@@ -70,8 +70,13 @@ canvasMe.canva.prototype = {
 
 	 */
 	draw: function (opt) {
-		this.del(opt.id);   ////////// not ready
+		// удаляем фигуру с таким id
+		this.del(opt.id); 
+		  
+		// добавляем новую
 		this.figures[opt.id] = opt;
+		
+		//отрисовываем ее
 		canvasMe.tools[opt.figure].call(this, opt);
 		
 	},
@@ -100,7 +105,10 @@ canvasMe.canva.prototype = {
 	 */
 	refreshCanv : function () {
 		var a;
+		// очищаем канвас
 		this.ctx.clearRect(0, 0, this.node.width, this.node.height);
+		
+		//рисуем все фигуры
 		for (a in this.figures) {
 			this.draw(this.figures[a]);
 		}
