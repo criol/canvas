@@ -6,7 +6,7 @@
 
 var canvasMe;
 
-(function (nodeName) {
+(function () {
 
 /**
  * вернуть/создать объект canvasMe
