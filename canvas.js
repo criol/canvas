@@ -42,6 +42,9 @@ var canvasMe;
         // 2d контекст
         this.ctx = this.node.getContext('2d');
 
+        // все собранные геттеры для фигур
+        this.createdGetters = {};
+
         // сохраняем полученный объект в массив узлов(канвасов)
         canvasMe.nodes[nodeName] = this;
 
@@ -123,13 +126,32 @@ var canvasMe;
          * @param {String} [id] - id фигуры
          */
         get: function (id) {
+            if (this.createdGetters[id]) {
+                return this.createdGetters[id];
+            }
+            if (!this.figures[id]) {
+                return null;
+            }
             var f = function(){},
                 F;
 
             f.prototype = this.figures[id].methods;
             F = new f();
 
+            this.createdGetters[id] = F;
             return F;
+        },
+
+        /**
+         * задать размеры
+         *
+         * @expose
+         * @param {Int} [width] - ширина канвы
+         * @param {Int} [height] - высота канвы
+         */
+        setSize: function (width, height) {
+            this.node.width = width;
+            this.node.height = height;
         }
     };
 
@@ -138,6 +160,55 @@ var canvasMe;
 /////////////////////////////////
 
     canvasMe.tools = {
+        /**
+         * нарисовать линию
+         *
+         * @expose
+         * @param {Object} [opt] - объект с параметрами (тип фигуры, позиция и тд)
+         */
+        line : function (opt) {
+            var fromX = opt.fromX,
+                fromY = opt.fromY,
+                toX = opt.toX,
+                toY = opt.toY;
+
+            this.ctx.beginPath();
+            this.ctx.moveTo(fromX, fromY);
+            this.ctx.lineTo(toX, toY);
+            this.ctx.strokeStyle = opt.stroke || "#000000";
+            this.ctx.stroke();
+            this.ctx.closePath();
+            this.figures[opt.id].methods = {
+                stroke : function (opt, col) {
+                    if (!col) {
+                        return opt.stroke;
+                    }
+                    opt.stroke = col;
+                    this.draw(opt);
+                    return this.get(opt.id);
+                },
+                position : function (opt, fromX, fromY, toX, toY) {
+                    if (!fromX && !fromY && !toX && !toY) {
+                        return {
+                            fromX: opt.fromX,
+                            fromY: opt.fromY,
+                            toX: opt.toX,
+                            toY: opt.toY
+                        }
+                    }
+
+                    opt.fromX = fromX || opt.fromX;
+                    opt.fromY = fromY || opt.fromY;
+                    opt.toX = toX || opt.toX;
+                    opt.toY = toY || opt.toY;
+                    this.draw(opt);
+                    return this.get(opt.id);
+                },
+                remove : canvasMe.commonTools.remove,
+                getId: canvasMe.commonTools.getId
+            };
+        },
+
         /**
          * нарисовать круг
          *
@@ -244,13 +315,19 @@ var canvasMe;
                     return this.get(opt.id);
                 },
                 position : function (opt, x, y) {
-                    if (!x && !y) {
+                    if (!x && !y && typeof(x) != 'number' && typeof(y) != 'number') {
                         return {
                             x: opt.x,
                             y: opt.y
                         }
                     }
-                    opt.x = x || opt.x;
+
+                    if (!x && typeof(x) != 'number') {
+                        opt.x = opt.x
+                    } else {
+                        opt.x = x;
+                    }
+
                     opt.y = y || opt.y;
                     this.draw(opt);
                     return this.get(opt.id);
